@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project  basedir="." default="compile">
+  <!-- 如何使用本build文件,首先看一下文件头部的关于property部分的设置, -->
+  <!-- 将其调整为你本机相应的值, -->
+  <!--然后修改$TOMCAT_HOME/conf/tomcat-user.xml 
+      需要添加manager角色,并将manager角色加入到tomcat用户中
+      注意本配置文件是针对tomcat5.5的,有些配置不适合tomcat6
+      比如tomcat5.5下面的common目录,而6没有等.
+      另外deploy 和compile两个target 实际上只是一个空target
+      它调用其他的target 来完成任务,至于调用哪一个,你必须事先设置
+  -->
+  <!-- <property file="build.properties"/>
+       如果将将属性在一个proerties文件中进行配置,可以用这行代码
+       不过本人不太喜欢用两个文件,一旦分离,两文件形同废物.
+  -->
+  <property name="name" value="j6"/>
+  <property environment="env"/> <!-- 可以用${env.TOMCAT_HOME}引用环境变量 -->
+  <property name="src.dir"   location="./src/"/>
+  <property name="build.dir" location="./bin/"/>
+  
+  <path id="master-classpath">  
+    <fileset dir="./lib/">  
+      <include name="*.jar"/>  
+    </fileset>  
+    <pathelement path="${build.dir}"/>
+  </path>
+  
+  
+    <target name="init" description="copy resources to build dir">  
+    <echo >copy resource files from src dir to build dir</echo>  
+    <mkdir dir="${build.dir}"/>  
+  </target> 
+  
+  <target name="compile.nonfork" description="Compile source without
+                                              starting a new jvm"  depends="init">  
+    <javac destdir="${build.dir}" target="1.6" debug="true" includeantruntime="on"    encoding="utf-8"
+           deprecation="false" optimize="true" failonerror="true" >  
+      <src path="${src.dir}"/>
+      <classpath refid="master-classpath"/>
+    </javac>  
+  </target>  
+  <target name="compile" description=
+          "Compile source by call compile.nonfork or compile.fork ,you must set it before you run it "
+          depends="compile.nonfork">
+    <!-- 只是简单的依赖compile.fork 或者依赖compile.nonfork
+         注意compile.fork 与compile.nonfork都是进行编译工作
+         不同一处在于前者会启动新的jvm进行编译,究竟使用哪种方式,自已抉择.
+    -->
+  </target>
+  
+  
+</project>
+
